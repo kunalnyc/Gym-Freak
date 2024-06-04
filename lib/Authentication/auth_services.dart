@@ -2,11 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthServices {
-  // ignore: unused_field
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final currentUser = FirebaseAuth.instance.currentUser!.uid;
-  //Signup to fit-freak
+  
+  // Sign up to Fit Freak
   Future<String> signUpUser({
     required String email,
     required String password,
@@ -14,32 +13,29 @@ class AuthServices {
   }) async {
     String res = "Error";
     try {
-      if (password.isNotEmpty || userName.isNotEmpty || email.isNotEmpty) {
+      if (email.isNotEmpty && password.isNotEmpty && userName.isNotEmpty) {
         UserCredential cred = await _auth.createUserWithEmailAndPassword(
             email: email, password: password);
         await cred.user!.sendEmailVerification();
-        try {
-          await _firestore.collection('Users').doc(cred.user!.uid).set({
-            'username': userName,
-            'email': email,
-          });
-        } on FirebaseException catch (error) {
-          res = 'Error saving user data: ${error.message}';
-        }
+        
+        await _firestore.collection('Users').doc(cred.user!.uid).set({
+          'username': userName,
+          'email': email,
+        });
 
         res = 'Success';
       } else {
         res = 'Please fill in all the fields.';
       }
     } on FirebaseAuthException catch (error) {
-      res = error.message!;
+      res = error.message ?? "An error occurred";
     } catch (error) {
       res = error.toString();
     }
     return res;
   }
 
-// Login to Fit Freak
+  // Login to Fit Freak
   Future<String> loginUser({
     required String email,
     required String password,
@@ -49,8 +45,8 @@ class AuthServices {
         return "All fields are required";
       }
 
-      final UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
+      UserCredential userCredential =
+          await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -74,7 +70,7 @@ class AuthServices {
 
   Future<void> sendEmailVerification() async {
     User? user = _auth.currentUser;
-    if (user != null) {
+    if (user != null && !user.emailVerified) {
       await user.sendEmailVerification();
     }
   }

@@ -12,34 +12,35 @@ class SignupScreen extends StatefulWidget {
   State<SignupScreen> createState() => _SignupScreenState();
 }
 
-final TextEditingController emailController = TextEditingController();
-final TextEditingController passwordController = TextEditingController();
-final TextEditingController userNameController = TextEditingController();
-final TextEditingController confirmPasswordController = TextEditingController();
-
-bool _isLoading = false;
-
 class _SignupScreenState extends State<SignupScreen> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController userNameController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
+
+  bool _isLoading = false;
+
   @override
   void dispose() {
-    super.dispose();
     emailController.dispose();
     passwordController.dispose();
     userNameController.dispose();
     confirmPasswordController.dispose();
+    super.dispose();
   }
+
   void signUpUser(BuildContext context) async {
-    // Check for empty fields and profile photo
+    // Check for empty fields
     if (userNameController.text.isEmpty ||
         passwordController.text.isEmpty ||
-        // confirmPasswordController.text.isEmpty ||
+        confirmPasswordController.text.isEmpty ||
         emailController.text.isEmpty) {
       showCupertinoDialog(
         context: context,
         builder: (context) => CupertinoAlertDialog(
           title: const Text("Oops, Something's Missing!"),
           content: const Text(
-            " Make sure to fill out all fields and add your profile photo, please.",
+            "Make sure to fill out all fields, please.",
             style: TextStyle(fontSize: 16),
           ),
           actions: <Widget>[
@@ -53,9 +54,20 @@ class _SignupScreenState extends State<SignupScreen> {
           ],
         ),
       );
-
       return;
     }
+
+    // Check if passwords match
+    if (passwordController.text != confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Passwords do not match."),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
@@ -63,9 +75,9 @@ class _SignupScreenState extends State<SignupScreen> {
     String res = await AuthServices().signUpUser(
       email: emailController.text,
       password: passwordController.text,
-      // Add this line
-      userName: userNameController.text, // Add this line
+      userName: userNameController.text,
     );
+
     setState(() {
       _isLoading = false;
     });
@@ -81,11 +93,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
       // Navigate to verification page
       Navigator.push(
-        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(
-          builder: (context) =>
-              EmailVerificationPage(email: emailController.text),
+          builder: (context) => EmailVerificationPage(email: emailController.text),
         ),
       ).then((value) {
         // Refresh verification page after user clicks on verification link
@@ -97,12 +107,10 @@ class _SignupScreenState extends State<SignupScreen> {
       });
     } else {
       // Show snackbar with error message
-      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
           content: Text(res),
-          // ignore: use_build_context_synchronously
           backgroundColor: Theme.of(context).brightness == Brightness.light
               ? Colors.black
               : Colors.white,
@@ -128,8 +136,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     padding: EdgeInsets.all(8.0),
                     child: Text(
                       'Sign Up',
-                      style:
-                          TextStyle(fontSize: 24, color: CupertinoColors.white),
+                      style: TextStyle(fontSize: 24, color: CupertinoColors.white),
                     ),
                   ),
                 ],
@@ -148,64 +155,68 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ],
               ),
-              TextField(
-                  controller: userNameController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
-                      label: Text('Username'), border: OutlineInputBorder())),
-              const SizedBox(
-                height: 20,
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                    controller: userNameController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                        label: Text('Username'), border: OutlineInputBorder())),
               ),
-              TextField(
-                  controller: emailController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
-                      label: Text('Email'), border: OutlineInputBorder())),
-              const SizedBox(
-                height: 20,
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                    controller: emailController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                        label: Text('Email'), border: OutlineInputBorder())),
               ),
-              TextField(
-                  controller: passwordController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
-                      label: Text('Password'), border: OutlineInputBorder())),
-              const SizedBox(
-                height: 20,
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                    controller: passwordController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                        label: Text('Password'), border: OutlineInputBorder())),
               ),
-              TextField(
-                  controller: confirmPasswordController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
-                      label: Text('Confirm password'),
-                      border: OutlineInputBorder())),
-              const SizedBox(
-                height: 20,
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                    controller: confirmPasswordController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                        label: Text('Confirm password'), border: OutlineInputBorder())),
               ),
+              const SizedBox(height: 20),
               CupertinoButton(
                 color: CupertinoColors.activeGreen,
                 borderRadius: BorderRadius.circular(30),
-                onPressed: () => signUpUser(context),
-                child: const Text(
-                  'Sign Up',
-                  style: TextStyle(color: CupertinoColors.black),
-                ),
+                onPressed: _isLoading ? null : () => signUpUser(context),
+                child: _isLoading
+                    ? const CupertinoActivityIndicator()
+                    : const Text(
+                        'Sign Up',
+                        style: TextStyle(color: CupertinoColors.black),
+                      ),
               ),
-              const SizedBox(
-                height: 10,
-              ),
+              const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    'Already a Fit-Freak Account',
+                    'Already have a Fit-Freak Account?',
                     style: TextStyle(color: CupertinoColors.systemGrey),
                   ),
                   Padding(
                     padding: const EdgeInsets.only(left: 2.0),
                     child: InkWell(
                       onTap: () {
-                        Navigator.of(context).push(CupertinoPageRoute(
-                            builder: (context) => const LoginScreen()));
+                        Navigator.of(context).push(
+                          CupertinoPageRoute(builder: (context) => const LoginScreen()),
+                        );
                       },
                       child: const Text(
                         'Login',
@@ -214,7 +225,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ],

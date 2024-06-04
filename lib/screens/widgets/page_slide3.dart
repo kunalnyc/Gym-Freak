@@ -22,9 +22,28 @@ class PageSlides3 extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          DropShadowImage(
-            offset: const Offset(10,10),
-            image: Image.asset(image),
+          Container(
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black
+                      .withOpacity(0.5), // Adjust color and opacity as needed
+                  spreadRadius: 2, // Spread radius
+                  blurRadius: 5, // Blur radius
+                  offset: Offset(0, 2), // Shadow offset
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius:
+                  BorderRadius.circular(10), // Adjust border radius as needed
+              child: Image.asset(
+                image, // Replace with your image path
+                width: 200, // Adjust width as needed
+                height: 200, // Adjust height as needed
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
 
           Padding(

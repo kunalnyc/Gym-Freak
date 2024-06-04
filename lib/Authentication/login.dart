@@ -18,33 +18,39 @@ final TextEditingController passwordController = TextEditingController();
 
 class _LoginScreenState extends State<LoginScreen> {
   bool isLoading = false;
-  @override
-  void dispose() {
-    super.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-  }
+ @override
+void dispose() {
+  emailController.dispose();
+  passwordController.dispose();
+  super.dispose();
+}
+
 
   void login() async {
-    setState(() {
-      isLoading = true;
-    });
-    try {
-      String res = await AuthServices().loginUser(
-          email: emailController.text, password: passwordController.text);
+  setState(() {
+    isLoading = true;
+  });
 
-      if (res == 'Success') {
-        // ignore: use_build_context_synchronously
-        Navigator.of(context)
-            .pushReplacement(CupertinoPageRoute(builder: (context) => const HomePage()));
-      }
-    } catch (e) {
-      print(e);
+  try {
+    String res = await AuthServices().loginUser(
+      email: emailController.text, 
+      password: passwordController.text,
+    );
+
+    if (res == 'Success') {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
     }
-    setState(() {
-      isLoading = false;
-    });
+  } catch (e) {
+    print(e);
+    // Handle error, show error message or log the error
   }
+
+  setState(() {
+    isLoading = false;
+  });
+}
 
   @override
   Widget build(BuildContext context) {
