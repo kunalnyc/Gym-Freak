@@ -41,7 +41,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     'Your fitness journey starts now\n      Get active & stay healthy',
                 tap: CupertinoButton(
                   onPressed: null,
-                  child: Text(''),
+                  child: Text('Next'),
                 ),
               ),
               const PageSlides2(
@@ -51,7 +51,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     'Build Workout, Select excercises \n set weights & reps',
                 tap: CupertinoButton(
                   onPressed: null,
-                  child: Text(''),
+                  child: Text('Next'),
                 ),
               ),
               PageSlides(
@@ -61,8 +61,17 @@ class _WelcomePageState extends State<WelcomePage> {
                 tap: CupertinoButton(
                   color: CupertinoColors.activeGreen,
                   onPressed: () {
-                    Navigator.of(context).push(CupertinoPageRoute(
-                        builder: (context) => const SignupScreen()));
+                    if (_currentPage < 2) {
+                      _pageController.animateToPage(
+                        _currentPage + 1,
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.easeInOut,
+                      );
+                    } else {
+                      Navigator.of(context).push(CupertinoPageRoute(
+                        builder: (context) => const SignupScreen(),
+                      ));
+                    }
                   },
                   child: const Text('Next'),
                 ),
